@@ -15,26 +15,32 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import contractABI from "../../../contracts/PromptHashAbi.json";
-import { useAccount, useContract, useReadContract } from "@starknet-react/core";
-import { PROMPTHASH_STARKNET_ABI, PROMPTHASH_STARKNET_ADDRESS } from "@/lib/constants";
+// import { useAccount, useContract, useReadContract } from "@starknet-react/core";
+import { PROMPT_HASH_BNB_ADDRESS, PROMPT_HASH_EVM_ABI } from "@/lib/constants";
 import { contractAddressToHex, shortenAddress } from "@/lib/utils";
 import { PromptCard } from "./PromptCard";
 import { PromptModal } from "./PromptModal";
+import { useReadContract } from "thirdweb/react";
+import { getContract } from "thirdweb";
+import { client } from "@/components/thirdwebClient";
+import { bscTestnet } from "thirdweb/chains";
 
 const ITEMS_PER_PAGE = 10;
 
-export type Prompt = {
-  id: string //in contract
-  title: string
-  description: string //in contract
-  category: string 
-  imageUrl: string //in contract
-  price: string
-  likes: number
-  owner: string //not in contract
-  exists: boolean //in contract
-  onSale: boolean //in contract
-} | undefined
+export type Prompt =
+  | {
+      id: string; //in contract
+      title: string;
+      description: string; //in contract
+      category: string;
+      imageUrl: string; //in contract
+      price: string;
+      likes: number;
+      owner: string; //not in contract
+      exists: boolean; //in contract
+      onSale: boolean; //in contract
+    }
+  | undefined;
 
 const FetchAllPrompts = ({
   selectedCategory = "",
@@ -48,36 +54,50 @@ const FetchAllPrompts = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { address } = useAccount();
-  
+  // const { address } = useAccount();
+
   // const { contract } = useContract({
   //   abi: PROMPTHASH_STARKNET_ABI,
   //   address: PROMPTHASH_STARKNET_ADDRESS
   // });
 
-  const { data: rawPrompts, isLoading } = useReadContract({
-    abi: PROMPTHASH_STARKNET_ABI,
-    address: PROMPTHASH_STARKNET_ADDRESS,
-    functionName: "get_all_prompts",
-    args: [],
-    watch: true
-  })
+  const contract = getContract({
+    client: client,
+    chain: bscTestnet,
+    address: PROMPT_HASH_BNB_ADDRESS,
+    abi: PROMPT_HASH_EVM_ABI,
+  });
 
-  const formattedPrompts: Prompt[] = rawPrompts ?
-    rawPrompts.map((prompt, index) => {
-      return {
-        id: prompt.id.toString(),
-        title: prompt.title,
-        description: prompt.description,
-        category: prompt.category,
-        imageUrl: prompt.image_url,
-        price: prompt.price.toString(),
-        likes: 2,
-        owner: contractAddressToHex(prompt.owner),
-        exists: !!prompt,
-        onSale: prompt.for_sale
-      }
-    }) : []
+  const { data: rawPrompts, isLoading } = useReadContract({
+    contract,
+    method: "getAllPrompts",
+    params: [],
+  });
+
+  // const { data: rawPrompts, isLoading } = useReadContract({
+  //   abi: PROMPTHASH_STARKNET_ABI,
+  //   address: PROMPTHASH_STARKNET_ADDRESS,
+  //   functionName: "get_all_prompts",
+  //   args: [],
+  //   watch: true
+  // })
+
+  const formattedPrompts: Prompt[] = rawPrompts
+    ? rawPrompts.map((prompt, index) => {
+        return {
+          id: prompt.promptId.toString(),
+          title: prompt.title,
+          description: prompt.description,
+          category: prompt.category,
+          imageUrl: prompt.imageUrl,
+          price: prompt.price.toString(),
+          likes: Number(prompt.likes),
+          owner: prompt.owner,
+          exists: !!prompt,
+          onSale: prompt.onSale,
+        };
+      })
+    : [];
 
   // const promptHashCall = useMemo(() => {
   //   return [
@@ -86,7 +106,7 @@ const FetchAllPrompts = ({
   // }, []);
 
   // const erc721Call = useMemo(() => {
-    
+
   // }, []);
 
   useEffect(() => {
@@ -142,7 +162,7 @@ const FetchAllPrompts = ({
   const totalPages = Math.ceil(formattedPrompts.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentPrompts = formattedPrompts.slice(startIndex, endIndex);
+  // const currentPrompts = formattedPrompts.slice(startIndex, endIndex);
 
   const nextPage = () => {
     if (currentPage < totalPages) {
@@ -171,58 +191,64 @@ const FetchAllPrompts = ({
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentPrompts.map((prompt, index) => {
+        {formattedPrompts.map((prompt, index) => {
           // if (!prompt) return
           return (
-          // <Card
-          //   key={prompt?.id}
-          //   className="group relative overflow-hidden transition-all hover:shadow-lg"
-          // >
-          //   <div className="aspect-video relative overflow-hidden">
-          //     <Image
-          //       src={prompt?.imageUrl || "/images/codeguru.png"}
-          //       alt={prompt?.title || `Prompt ${index}`}
-          //       fill
-          //       className="object-cover transition-transform group-hover:scale-105"
-          //       onError={handleImageError}
-          //     />
-          //     <Badge className="absolute top-2 right-2 z-10">
-          //       {prompt?.category}
-          //     </Badge>
-          //   </div>
-          //   <CardContent className="p-4">
-          //     <h3 className="font-semibold">
-          //       {prompt?.title}
-          //     </h3>
-          //     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-          //       {prompt?.description}
-          //     </p>
-          //     <div className="flex items-center gap-2 mt-2">
-          //       <div className="flex items-center gap-1 text-yellow-500">
-          //         <StarIcon className="h-4 w-4 fill-current" />
-          //         <span className="text-sm">
-          //           {prompt?.likes}
-          //         </span>
-          //       </div>
-          //       <p className="text-sm text-muted-foreground">
-          //         Seller: {prompt?.owner.slice(0, 6)}...
-          //       </p>
-          //     </div>
-          //   </CardContent>
-          //   <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          //     <span className="text-lg font-bold">
-          //       {prompt?.price} STRK
-          //     </span>
-          //     <Button 
-          //       onClick={() => openModal(prompt)}
-          //     >
-          //       <ShoppingCart className="mr-2 h-4 w-4" />
-          //       Buy Now
-          //     </Button>
-          //   </CardFooter>
-          // </Card>
-          <PromptCard prompt={prompt} index={index} openModal={openModal} handleImageError={handleImageError} />
-        )})}
+            // <Card
+            //   key={prompt?.id}
+            //   className="group relative overflow-hidden transition-all hover:shadow-lg"
+            // >
+            //   <div className="aspect-video relative overflow-hidden">
+            //     <Image
+            //       src={prompt?.imageUrl || "/images/codeguru.png"}
+            //       alt={prompt?.title || `Prompt ${index}`}
+            //       fill
+            //       className="object-cover transition-transform group-hover:scale-105"
+            //       onError={handleImageError}
+            //     />
+            //     <Badge className="absolute top-2 right-2 z-10">
+            //       {prompt?.category}
+            //     </Badge>
+            //   </div>
+            //   <CardContent className="p-4">
+            //     <h3 className="font-semibold">
+            //       {prompt?.title}
+            //     </h3>
+            //     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+            //       {prompt?.description}
+            //     </p>
+            //     <div className="flex items-center gap-2 mt-2">
+            //       <div className="flex items-center gap-1 text-yellow-500">
+            //         <StarIcon className="h-4 w-4 fill-current" />
+            //         <span className="text-sm">
+            //           {prompt?.likes}
+            //         </span>
+            //       </div>
+            //       <p className="text-sm text-muted-foreground">
+            //         Seller: {prompt?.owner.slice(0, 6)}...
+            //       </p>
+            //     </div>
+            //   </CardContent>
+            //   <CardFooter className="p-4 pt-0 flex justify-between items-center">
+            //     <span className="text-lg font-bold">
+            //       {prompt?.price} STRK
+            //     </span>
+            //     <Button
+            //       onClick={() => openModal(prompt)}
+            //     >
+            //       <ShoppingCart className="mr-2 h-4 w-4" />
+            //       Buy Now
+            //     </Button>
+            //   </CardFooter>
+            // </Card>
+            <PromptCard
+              prompt={prompt}
+              index={index}
+              openModal={openModal}
+              handleImageError={handleImageError}
+            />
+          );
+        })}
       </div>
       {/* Pagination Controls */}
       {totalPages > 1 && (
@@ -324,7 +350,7 @@ const FetchAllPrompts = ({
         //         <span className="text-2xl font-bold">
         //           {selectedPrompt.price} STRK
         //         </span>
-        //         <Button 
+        //         <Button
         //           // onClick={() => handleBuyPrompt(selectedPrompt)}
         //         >
         //           <ShoppingCart className="mr-2 h-4 w-4" />
@@ -334,7 +360,11 @@ const FetchAllPrompts = ({
         //     </div>
         //   </div>
         // </div>
-        <PromptModal closeModal={closeModal} selectedPrompt={selectedPrompt} handleImageError={handleImageError}/>
+        <PromptModal
+          closeModal={closeModal}
+          selectedPrompt={selectedPrompt}
+          handleImageError={handleImageError}
+        />
       )}
     </>
   );

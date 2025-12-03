@@ -8,7 +8,8 @@ export async function POST(request) {
     await connectDb();
 
     const promptData = await request.json();
-    const { image, title, content, walletAddress, price, category } = promptData;
+    const { image, title, content, walletAddress, price, category } =
+      promptData;
 
     // Validate required fields with specific messages
     const missingFields = [];
@@ -23,19 +24,19 @@ export async function POST(request) {
         {
           error: `Missing required fields: ${missingFields.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Find the user by wallet address
-    const user = await User.findOne({ 
-      walletAddress: walletAddress.toLowerCase() 
+    const user = await User.findOne({
+      walletAddress: walletAddress.toLowerCase(),
     });
 
     if (!user) {
       return NextResponse.json(
         { error: "User not found. Please connect your wallet first." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -52,20 +53,23 @@ export async function POST(request) {
     await newPrompt.save();
 
     // Populate the owner details in the response
-    const populatedPrompt = await newPrompt.populate('owner', 'username walletAddress');
+    const populatedPrompt = await newPrompt.populate(
+      "owner",
+      "username walletAddress",
+    );
 
     return NextResponse.json(
-      { 
-        message: "Prompt created successfully", 
-        prompt: populatedPrompt 
+      {
+        message: "Prompt created successfully",
+        prompt: populatedPrompt,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create prompt error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to create prompt" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -85,8 +89,8 @@ export async function GET(request) {
     }
 
     if (walletAddress) {
-      const user = await User.findOne({ 
-        walletAddress: walletAddress.toLowerCase() 
+      const user = await User.findOne({
+        walletAddress: walletAddress.toLowerCase(),
       });
       if (user) {
         query.owner = user._id;
@@ -102,7 +106,7 @@ export async function GET(request) {
     console.error("Fetch prompts error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch prompts" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

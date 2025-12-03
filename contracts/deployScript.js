@@ -31,7 +31,7 @@ async function deployContract() {
   const rpcUrl = process.env.RPC_URL;
   if (!operatorIdStr || !operatorKeyStr || !rpcUrl) {
     throw new Error(
-      "Must set OPERATOR_ACCOUNT_ID, OPERATOR_ACCOUNT_PRIVATE_KEY, and RPC_URL environment variables"
+      "Must set OPERATOR_ACCOUNT_ID, OPERATOR_ACCOUNT_PRIVATE_KEY, and RPC_URL environment variables",
     );
   }
 
@@ -48,30 +48,26 @@ async function deployContract() {
       `../PromptHash/contracts/${solidityFileName}.abi`,
       {
         encoding: "utf8",
-      }
+      },
     );
     const evmBytecode = await fs.readFile(
       `../PromptHash/contracts/${solidityFileName}.bin`,
       {
         encoding: "utf8",
-      }
+      },
     );
     console.log(
       "Compiled smart contract ABI:",
       abi.substring(0, 32),
-      CHARS.HELLIP
+      CHARS.HELLIP,
     );
     console.log(
       "Compiled smart contract EVM bytecode:",
       evmBytecode.substring(0, 32),
-      CHARS.HELLIP
+      CHARS.HELLIP,
     );
 
-    const promptFactory = new ContractFactory(
-      abi,
-      evmBytecode,
-      operatorWallet
-    );
+    const promptFactory = new ContractFactory(abi, evmBytecode, operatorWallet);
 
     // Deploy without constructor arguments
     const myContract = await promptFactory.deploy();
@@ -79,7 +75,7 @@ async function deployContract() {
     const deploymentTxReceipt = await deployTx.wait();
     console.log(
       "Smart contract deployment transaction fee",
-      calculateTransactionFeeFromViem(deploymentTxReceipt)
+      calculateTransactionFeeFromViem(deploymentTxReceipt),
     );
 
     const deploymentTxAddress = myContract.address;
@@ -88,7 +84,7 @@ async function deployContract() {
     console.log("Smart contract deployment address:", deploymentTxAddress);
     console.log(
       "Smart contract deployment Starkscan URL:\n",
-      ("URL", deploymentTxStarkscanUrl)
+      ("URL", deploymentTxStarkscanUrl),
     );
   } catch (error) {
     console.error("Error initializing client:", error);

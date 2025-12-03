@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: MIT
+
+
 pragma solidity ^0.8.17;
 
+
+
 // Add this struct outside the contract to define the return type
+
+
 struct PromptView {
     uint256 promptId;
     string title;
@@ -17,8 +23,8 @@ struct PromptView {
 
 contract PromptHash {
     address public owner;
-    uint256 public constant PROMPT_CREATION_FEE = 2 * 100_000_000; // 2 HBAR
-    uint256 public constant FEE_AMOUNT = 2 * 100_000_000; // 2 HBAR fee
+    uint256 public constant PROMPT_CREATION_FEE = 2 * 100_00; // 0.0002 BNB
+    uint256 public constant FEE_AMOUNT = 2 * 100_00; // 0.0002 BNB fee
     uint256 private nextPromptId = 1; // Track the next available prompt ID
 
     struct Prompt {
@@ -109,7 +115,7 @@ contract PromptHash {
     function buy(uint256 promptId) external payable promptExists(promptId) {
         Prompt storage prompt = prompts[promptId];
         require(prompt.onSale, "Prompt not for sale");
-        require(msg.value >= PROMPT_CREATION_FEE, "Must send at least 2 HBAR");
+        require(msg.value == prompt.price, "Incorrect payment amount");
         require(msg.sender != prompt.owner, "Cannot buy own prompt");
 
         address seller = prompt.owner;
@@ -117,7 +123,6 @@ contract PromptHash {
         // Update prompt ownership and sale status
         prompt.owner = msg.sender;
         prompt.onSale = false;
-        prompt.price = 0;
 
         // Update user prompt mappings
         removePromptFromUser(promptId, seller);
@@ -137,8 +142,8 @@ contract PromptHash {
     ) external promptExists(promptId) {
         Prompt storage prompt = prompts[promptId];
         require(
-            msg.sender == prompt.owner,
-            "Only owner can update sale status"
+        msg.sender == prompt.owner,
+        "Only owner can update sale status"
         );
 
         prompt.onSale = newOnSale;
@@ -165,7 +170,7 @@ contract PromptHash {
         for (uint256 i = 1; i < nextPromptId; i++) {
             if (prompts[i].exists) {
                 validPromptCount++;
-            }
+            } 
         }
 
         // Create array with exact size needed
@@ -205,6 +210,7 @@ contract PromptHash {
                 break;
             }
         }
+
     }
 
     function withdraw() external onlyOwner {

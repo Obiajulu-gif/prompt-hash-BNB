@@ -51,9 +51,7 @@ export default function BrowsePage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Price Range (STRK)
-                </label>
+                <label className="text-sm font-medium">Price Range (BNB)</label>
                 <Slider
                   value={priceRange}
                   onValueChange={setPriceRange}
@@ -62,8 +60,8 @@ export default function BrowsePage() {
                   step={1}
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{priceRange[1]} STRK</span>
-                  <span>{priceRange[1000]} STRK</span>
+                  <span>{priceRange[1]} BNB</span>
+                  <span>{priceRange[1000]} BNB</span>
                 </div>
               </div>
               <div className="space-y-2">

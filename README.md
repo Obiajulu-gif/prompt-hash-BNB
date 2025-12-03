@@ -155,25 +155,25 @@ import { Account, Contract, json } from "starknet";
 import fs from "fs";
 
 const compiledContract = json.parse(
-	fs
-		.readFileSync(
-			"./target/dev/prompt_hash_PromptHash.compiled_contract_class.json"
-		)
-		.toString("ascii")
+  fs
+    .readFileSync(
+      "./target/dev/prompt_hash_PromptHash.compiled_contract_class.json",
+    )
+    .toString("ascii"),
 );
 
 (async () => {
-	// Declare contract
-	const declareResponse = await account.declare({ contract: compiledContract });
-	await provider.waitForTransaction(declareResponse.transaction_hash);
+  // Declare contract
+  const declareResponse = await account.declare({ contract: compiledContract });
+  await provider.waitForTransaction(declareResponse.transaction_hash);
 
-	// Deploy contract
-	const deployResponse = await account.deployContract({
-		classHash: declareResponse.class_hash,
-	});
-	await provider.waitForTransaction(deployResponse.transaction_hash);
+  // Deploy contract
+  const deployResponse = await account.deployContract({
+    classHash: declareResponse.class_hash,
+  });
+  await provider.waitForTransaction(deployResponse.transaction_hash);
 
-	console.log("Contract Address:", deployResponse.contract_address);
+  console.log("Contract Address:", deployResponse.contract_address);
 })();
 ```
 
@@ -228,20 +228,20 @@ const tokenContract = new Contract(tokenAbi, tokenAddress, provider);
 
 // Mint tokens
 await account.execute([
-	{
-		contractAddress: tokenAddress,
-		entrypoint: "mint",
-		calldata: CallData.compile([recipientAddress, amount]),
-	},
+  {
+    contractAddress: tokenAddress,
+    entrypoint: "mint",
+    calldata: CallData.compile([recipientAddress, amount]),
+  },
 ]);
 
 // Transfer tokens
 await account.execute([
-	{
-		contractAddress: tokenAddress,
-		entrypoint: "transfer",
-		calldata: CallData.compile([recipientAddress, amount]),
-	},
+  {
+    contractAddress: tokenAddress,
+    entrypoint: "transfer",
+    calldata: CallData.compile([recipientAddress, amount]),
+  },
 ]);
 ```
 
@@ -280,10 +280,10 @@ const provider = new Provider({ sequencer: { network: "sepolia-alpha" } });
 
 // Listen for events
 const eventFilter = {
-	from_block: { block_number: 0 },
-	to_block: "latest",
-	address: contractAddress,
-	keys: [["PromptPurchased"]],
+  from_block: { block_number: 0 },
+  to_block: "latest",
+  address: contractAddress,
+  keys: [["PromptPurchased"]],
 };
 
 const events = await provider.getEvents(eventFilter);
@@ -398,13 +398,11 @@ console.log("Events:", events);
 ### Chat
 
 - `GET /api/chat` – Chat with AI model.
-
   - **Parameters:** `prompt` (string), `model` (optional)
 
 ### Prompt Improvement
 
 - `POST /api/improve-prompt` – Analyze and improve a prompt.
-
   - **Body:** `{ "prompt": "..." }`
 
 ### Health Check

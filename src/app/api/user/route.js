@@ -11,7 +11,7 @@ export async function POST(request) {
     if (!walletAddress) {
       return NextResponse.json(
         { error: "Wallet address is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +26,7 @@ export async function POST(request) {
         {
           message: "Login successful",
         },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -47,13 +47,13 @@ export async function POST(request) {
         message: "User registered successfully",
         user: newUser,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to register user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -85,7 +85,7 @@ export async function GET(request) {
     console.error("Fetch users error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
