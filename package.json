@@ -43,12 +43,7 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
-<<<<<<< HEAD
-    "@starknet-react/chains": "^4.0.0",
-    "@starknet-react/core": "^4.0.0",
-=======
     "@types/react": "latest",
->>>>>>> 8231bcf9c4cf218bd2ee0566f89f9d7b8250cde6
     "@types/react-dom": "latest",
     "ai": "^4.1.61",
     "autoprefixer": "^10.4.20",
