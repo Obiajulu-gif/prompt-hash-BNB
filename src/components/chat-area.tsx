@@ -20,7 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Message } from "@/components/chat-interface";
-import type { AIModel } from "@/lib/api";
+import type { AIModel, ModelOption } from "@/lib/api";
+import { formatAiText } from "@/lib/api";
 import { Typewriter } from "@/components/typewriter";
 import ReactMarkdown from "react-markdown";
 
@@ -33,6 +34,10 @@ interface ChatAreaProps {
   onReaction: (messageId: string, type: "like" | "dislike") => void;
   onSaveConversation: () => void;
   onCloseConversation: () => void;
+  models: ModelOption[];
+  modelCategories: Record<string, ModelOption[]>;
+  isModelLoading: boolean;
+  modelHint?: string;
   inputValue: string;
   setInputValue: (value: string) => void;
   selectedModel: AIModel;
@@ -47,17 +52,22 @@ const formatMessageContent = (content: string): string => {
     if (content.trim().startsWith("{") && content.trim().endsWith("}")) {
       const parsedContent = JSON.parse(content);
 
-      // Handle Gemini model response format
-      if (parsedContent.response) {
-        return parsedContent.response;
+      const candidate =
+        parsedContent.reply ||
+        parsedContent.response ||
+        parsedContent.Response ||
+        parsedContent.message;
+
+      if (candidate) {
+        return formatAiText(candidate);
       }
     }
 
-    return content;
+    return formatAiText(content);
   } catch (error) {
     // If parsing fails, return the original content
     console.log("Error parsing message content:", error);
-    return content;
+    return formatAiText(content);
   }
 };
 export function ChatArea({
@@ -69,6 +79,10 @@ export function ChatArea({
   onReaction,
   onSaveConversation,
   onCloseConversation,
+  models,
+  modelCategories,
+  isModelLoading,
+  modelHint,
   inputValue,
   setInputValue,
   selectedModel,
@@ -137,14 +151,37 @@ export function ChatArea({
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value as AIModel)}
             className="text-xs sm:text-sm border rounded-md py-1 px-1 sm:px-2 bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            disabled={isModelLoading || !models.length}
           >
-            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-            <option value="gemini-flash-latest">Gemini Flash Latest</option>
-            <option value="gemini-pro-latest">Gemini Pro Latest</option>
-            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+            {isModelLoading && !models.length ? (
+              <option value="">Loading models...</option>
+            ) : (
+              <>
+                {Object.entries(modelCategories || {}).map(
+                  ([category, options]) => (
+                    <optgroup key={category} label={category}>
+                      {options.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.displayName} ({option.id})
+                        </option>
+                      ))}
+                    </optgroup>
+                  ),
+                )}
+                {!Object.keys(modelCategories || {}).length &&
+                  models.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.displayName} ({option.id})
+                    </option>
+                  ))}
+              </>
+            )}
           </select>
+          {modelHint && (
+            <span className="text-[11px] text-gray-500 hidden sm:inline">
+              {modelHint}
+            </span>
+          )}
           <Button
             variant="outline"
             size="sm"

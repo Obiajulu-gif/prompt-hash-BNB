@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { ChatArea } from "@/components/chat-area";
 import { ConversationDetails } from "@/components/conversation-details";
-import { getChatResponse, improvePrompt, type AIModel } from "@/lib/api";
+import {
+  DEFAULT_MODEL,
+  getChatResponse,
+  getModels,
+  improvePrompt,
+  type AIModel,
+  type ModelOption,
+} from "@/lib/api";
 
 export function ChatInterface() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,9 +31,46 @@ export function ChatInterface() {
 
   const [customerName, setCustomerName] = useState("GS");
   const [isTyping, setIsTyping] = useState(false);
-  const [selectedModel, setSelectedModel] =
-    useState<AIModel>("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState<AIModel>(DEFAULT_MODEL);
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>([]);
+  const [modelCategories, setModelCategories] = useState<
+    Record<string, ModelOption[]>
+  >({});
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [modelHint, setModelHint] = useState("Loading models...");
   const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      setIsModelLoading(true);
+      try {
+        const catalog = await getModels();
+        if (!isMounted) return;
+        setModelOptions(catalog.models);
+        setModelCategories(catalog.categories);
+        setModelHint(`Loaded ${catalog.models.length} models`);
+        setSelectedModel((current) => {
+          if (catalog.models.some((m) => m.id === current)) {
+            return current;
+          }
+          return (catalog.models[0]?.id as AIModel) || DEFAULT_MODEL;
+        });
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Failed to load models, using fallback list", error);
+        setModelHint("Using fallback model list");
+        setModelOptions((prev) => (prev.length ? prev : []));
+      } finally {
+        if (isMounted) {
+          setIsModelLoading(false);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Handle sending a message
   const handleSendMessage = async (content: string) => {
@@ -55,26 +99,8 @@ export function ChatInterface() {
       const response = await getChatResponse(content, selectedModel);
 
       // Extract the response text from the object
-      let responseText = "Sorry, I couldn't generate a response.";
-
-      if (response) {
-        // Check if response has a "response" property (lowercase)
-        if (typeof response === "object" && response.response) {
-          responseText = response.response;
-        }
-        // Check if response has a "Response" property (uppercase) for backward compatibility
-        else if (typeof response === "object" && response.Response) {
-          responseText = response.Response;
-        }
-        // If it's a string, use it directly
-        else if (typeof response === "string") {
-          responseText = response;
-        }
-        // If it's an object but doesn't have response, stringify it
-        else if (typeof response === "object") {
-          responseText = JSON.stringify(response);
-        }
-      }
+      let responseText =
+        response?.reply || "Sorry, I couldn't generate a response.";
 
       // If the content is about bills, override with the specific response
       if (
@@ -125,26 +151,8 @@ export function ChatInterface() {
     if (!content.trim()) return content;
 
     try {
-      // Send just the prompt text, not an object
       const result = await improvePrompt(content);
-
-      if (result) {
-        // Handle different response formats
-        if (typeof result === "string") {
-          return result;
-        } else if (typeof result === "object") {
-          // Check for common properties that might contain the improved prompt
-          if (result.improved) {
-            return result.improved;
-          } else if (result.Response) {
-            return result.Response;
-          } else if (result.response) {
-            return result.response;
-          }
-        }
-      }
-
-      return content;
+      return result || content;
     } catch (error) {
       console.error("Error improving prompt:", error);
       return content;
@@ -216,6 +224,10 @@ export function ChatInterface() {
           onReaction={handleReaction}
           onSaveConversation={handleSaveConversation}
           onCloseConversation={handleCloseConversation}
+          models={modelOptions}
+          modelCategories={modelCategories}
+          isModelLoading={isModelLoading}
+          modelHint={modelHint}
           inputValue={inputValue}
           setInputValue={setInputValue}
           selectedModel={selectedModel}

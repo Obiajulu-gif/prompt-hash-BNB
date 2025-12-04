@@ -5,7 +5,14 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Bot, Send, Sparkles, User, Copy, Loader2, Wand2 } from "lucide-react";
-import { getChatResponse, improvePrompt, type AIModel } from "../lib/api";
+import {
+  DEFAULT_MODEL,
+  getChatResponse,
+  getModels,
+  improvePrompt,
+  type AIModel,
+  type ModelOption,
+} from "../lib/api";
 import ReactMarkdown from "react-markdown";
 import { Typewriter } from "@/components/typewriter";
 
@@ -26,8 +33,13 @@ export function AiChatButton() {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] =
-    useState<AIModel>("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState<AIModel>(DEFAULT_MODEL);
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>([]);
+  const [modelCategories, setModelCategories] = useState<
+    Record<string, ModelOption[]>
+  >({});
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [modelHint, setModelHint] = useState("Loading models...");
   const [isImproving, setIsImproving] = useState(false);
 
   const chatRef = useRef<HTMLDivElement>(null);
@@ -36,6 +48,37 @@ export function AiChatButton() {
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setIsModelLoading(true);
+      try {
+        const catalog = await getModels();
+        if (!active) return;
+        setModelOptions(catalog.models);
+        setModelCategories(catalog.categories);
+        setModelHint(`Loaded ${catalog.models.length} models`);
+        setSelectedModel((current) => {
+          if (catalog.models.some((m) => m.id === current)) {
+            return current;
+          }
+          return (catalog.models[0]?.id as AIModel) || DEFAULT_MODEL;
+        });
+      } catch (error) {
+        if (!active) return;
+        console.error("Failed to load models, using fallback list", error);
+        setModelHint("Using fallback model list");
+      } finally {
+        if (active) {
+          setIsModelLoading(false);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -65,26 +108,8 @@ export function AiChatButton() {
       const response = await getChatResponse(inputValue, selectedModel);
 
       // Extract the response text from the object
-      let responseText = "Sorry, I couldn't generate a response.";
-
-      if (response) {
-        // Check if response has a "response" property (lowercase)
-        if (typeof response === "object" && response.response) {
-          responseText = response.response;
-        }
-        // Check if response has a "Response" property (uppercase) for backward compatibility
-        else if (typeof response === "object" && response.Response) {
-          responseText = response.Response;
-        }
-        // If it's a string, use it directly
-        else if (typeof response === "string") {
-          responseText = response;
-        }
-        // If it's an object but doesn't have response, stringify it
-        else if (typeof response === "object") {
-          responseText = JSON.stringify(response);
-        }
-      }
+      let responseText =
+        response?.reply || "Sorry, I couldn't generate a response.";
 
       // Add AI response with typing effect
       const aiMessage: Message = {
@@ -131,29 +156,7 @@ export function AiChatButton() {
       const result = await improvePrompt(inputValue);
 
       if (result) {
-        // Handle different response formats
-        if (typeof result === "string") {
-          setInputValue(result);
-        } else if (typeof result === "object") {
-          // Check for common properties that might contain the improved prompt
-          if (result.improved) {
-            setInputValue(result.improved);
-          } else if (result.Response) {
-            setInputValue(result.Response);
-          } else if (result.response) {
-            setInputValue(result.response);
-          } else {
-            // If we can't find a specific property, log the object
-            console.warn("Unexpected improve prompt response format:", result);
-            // Try to use the first string property we find
-            for (const key in result) {
-              if (typeof result[key] === "string") {
-                setInputValue(result[key]);
-                break;
-              }
-            }
-          }
-        }
+        setInputValue(result);
       }
     } catch (error) {
       console.error("Error improving prompt:", error);
@@ -220,19 +223,36 @@ export function AiChatButton() {
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value as AIModel)}
                 className="text-sm border rounded-md py-1 px-2 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={isModelLoading || !modelOptions.length}
               >
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                <option value="gemini-flash-latest">Gemini Flash Latest</option>
-                <option value="gemini-pro-latest">Gemini Pro Latest</option>
-                <option value="gemini-2.0-flash-exp">
-                  Gemini 2.0 Flash Exp
-                </option>
+                {isModelLoading && !modelOptions.length ? (
+                  <option value="">Loading models...</option>
+                ) : (
+                  <>
+                    {Object.entries(modelCategories || {}).map(
+                      ([category, options]) => (
+                        <optgroup key={category} label={category}>
+                          {options.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.displayName} ({option.id})
+                            </option>
+                          ))}
+                        </optgroup>
+                      ),
+                    )}
+                    {!Object.keys(modelCategories || {}).length &&
+                      modelOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.displayName} ({option.id})
+                        </option>
+                      ))}
+                  </>
+                )}
               </select>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Ask me anything about prompts and the marketplace
+              {modelHint ||
+                "Ask me anything about prompts and the marketplace"}
             </p>
           </div>
 
