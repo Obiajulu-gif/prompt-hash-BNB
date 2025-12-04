@@ -20,7 +20,7 @@ export default function FaqSection() {
     {
       question: "What payment methods do you accept?",
       answer:
-        "We accept various payment methods including credit/debit cards, PayPal, and cryptocurrency (STRK, ETH, and BTC). All transactions are secure and encrypted.",
+        "We accept various payment methods including credit/debit cards, PayPal, and cryptocurrency (BNB, ETH, and BTC). All transactions are secure and encrypted.",
     },
     {
       question: "How does the hackathon work?",

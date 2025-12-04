@@ -253,7 +253,7 @@ const MyPrompts = () => {
                 </div>
               </CardContent>
               <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                <span className="text-lg font-bold">{prompt.price} STRK</span>
+                <span className="text-lg font-bold">{prompt.price} BNB</span>
                 <Button onClick={() => openModal(prompt)}>
                   <Eye className="mr-2 h-4 w-4" />
                   Edit Prompt
@@ -319,7 +319,7 @@ const MyPrompts = () => {
 
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-bold">
-                  {selectedPrompt.price} STRK
+                  {selectedPrompt.price} BNB
                 </span>
                 <div className="space-x-2">
                   {selectedPrompt.onSale ? (
@@ -333,7 +333,7 @@ const MyPrompts = () => {
                     <div className="flex gap-2">
                       <input
                         type="number"
-                        placeholder="Price in STRK"
+                        placeholder="Price in BNB"
                         value={salePrice}
                         onChange={(e) => setSalePrice(e.target.value)}
                         className="px-3 py-2 border rounded-md w-32"

@@ -4,29 +4,29 @@
 
 ## PromptHash
 
-PromptHash is a dynamic, AI-powered marketplace connecting prompt creators with users seeking inspiration, productivity, and cutting-edge solutions. Leveraging the high-performance, low-cost Starknet network for core marketplace operations and privacy-focused tooling for AI integration, our platform enables users to explore, create, buy, and sell high-quality AI prompts across various categories.
+PromptHash is a dynamic, AI-powered marketplace connecting prompt creators with users seeking inspiration, productivity, and cutting-edge solutions. The current deployment is anchored on **BNB Chain** for low-fee settlements and uses the **ASI AI** backend (Render service at `https://prompthash-asi.onrender.com`) to power chat, prompt improvement, and live model discovery. Users can explore, create, buy, and sell high-quality AI prompts across categories with fast BNB-native transactions.
 
 ---
 
 ## 🚀 Vision
 
-Our vision is to become the go-to resource where creators and users converge—leveraging advanced AI models, enterprise-grade Starknet infrastructure, and intuitive design—to spark transformative ideas across industries.
+Our vision is to become the go-to resource where creators and users converge—leveraging advanced AI models (via ASI), BNB Chain finality/fees, and intuitive design—to spark transformative ideas across industries.
 
 ---
 
 ## 🔑 Key Features
 
 - **🔍 Browse & Discover**: Explore curated collections of AI prompts from top creators.
-- **💰 Buy & Sell Prompts**: Monetize your expertise or find the perfect prompt, with all transactions settled via ETH on Starknet.
-- **🤖 Advanced AI Integration**: Powered by cutting-edge AI models (e.g., DeepSeek R1, Llama 3.2 Vision) through our privacy-preserving AI gateway.
-- **🔗 Starknet Smart Contracts**: On-chain prompt registry and payment escrow flows executed on Starknet using Cairo smart contracts.
-- **🔒 Blockchain Security**: Built on Starknet's STARK-based validity proofs infrastructure for enterprise-grade safety and scalability.
+- **💰 Buy & Sell Prompts**: Monetize your expertise or find the perfect prompt, with all transactions settled in **BNB** on BNB Chain.
+- **🤖 Advanced AI Integration**: Powered by ASI models via the Render-hosted API (`/api/chat`, `/api/improve`, `/api/models`) for chat, prompt polishing, and model lookup.
+- **🔗 BNB Chain Smart Contracts**: On-chain prompt registry and payment escrow flows executed on BNB Chain (EVM).
+- **🔒 Blockchain Security**: Low-fee, battle-tested BNB Chain settlement for marketplace flows.
 - **💬 Conversational AI**: Maintain context-aware chat sessions to refine or generate prompts in real time.
-- **🏛️ Governance**: Community-driven platform development and on-chain governance proposals via Cairo governance contracts.
+- **🏛️ Governance**: Community-driven platform development and on-chain governance proposals (EVM-ready).
 - **✨ Prompt Engineering Tools**: Interactive utilities to analyze, optimize, and refactor AI prompts.
 - **👨‍💻 Creator Profiles**: Dedicated spaces for top prompt creators, with on-chain reputation badges.
 - **🖼️ Multi-Format Support**: Generate images, text, and code with ease.
-- **📚 Comprehensive Documentation**: Detailed API documentation available via Swagger UI and ReDoc.
+- **📚 Comprehensive Documentation**: FastAPI docs live at `/docs` on the ASI service; legacy Starknet docs are retained below for reference.
 
 ---
 
@@ -38,7 +38,7 @@ Browse a curated collection of AI prompts across categories like Coding, Marketi
 
 ### Sell & Share
 
-List and monetize your top AI prompts with instant STRK settlements. Smart contract escrow ensures prompt delivery before funds release.
+List and monetize your top AI prompts with instant BNB settlements. Smart contract escrow ensures prompt delivery before funds release.
 
 ### Interactive Chat
 
@@ -50,7 +50,7 @@ Built with Next.js, React, and Tailwind CSS for a seamless, mobile-first experie
 
 ### API Integration
 
-Easy integration with your applications via our RESTful and GraphQL API endpoints, complete with Starknet transaction whitelisting.
+Easy integration with your applications via our RESTful endpoints (`/api/chat`, `/api/improve`, `/api/models`) powered by ASI, with BNB on-chain settlement for marketplace flows.
 
 ---
 
@@ -68,19 +68,21 @@ Easy integration with your applications via our RESTful and GraphQL API endpoint
 ## 🏗️ Tech Stack
 
 - **Frontend:** Next.js, React, Tailwind CSS
-- **Backend:** FastAPI for AI services; Node.js/Express for blockchain gateway
-- **AI Integration:** Private inference through Secret Network AI API
-- **Blockchain Integration:** Starknet via starknet.js and Cairo
-- **Smart Contracts:** Cairo (v2.6.0) deployed on Starknet Sepolia/Mainnet
-- **Authentication:** Wallet Connect & ArgentX/Braavos for user login
+- **Backend:** FastAPI (ASI service) plus Node.js/Express for the on-chain gateway
+- **AI Integration:** ASI API at `https://prompthash-asi.onrender.com` (`/api/chat`, `/api/improve`, `/api/models`)
+- **Blockchain Integration:** BNB Chain (EVM) via ethers.js/viem; settlement in BNB
+- **Smart Contracts:** Solidity contracts deployed to BNB Chain (contracts folder)
+- **Authentication:** Wallet-based auth (EVM connectors) for user login
 - **Server:** Uvicorn (ASGI) and Node.js processes managed with PM2
 - **Icons & UI:** Lucide for icon components
 
+> Note: Legacy Starknet documentation remains below for historical reference; current deployments target BNB Chain + ASI AI.
+
 ---
 
-## 🔗 Starknet Integration Details
+## 🔗 Legacy Starknet Integration Details
 
-To seamlessly integrate Starknet's scalable infrastructure, PromptHash leverages Cairo smart contracts, the Starknet JavaScript SDK, and STARK-based validity proofs. Each component is provisioned and configured via environment variables, code snippets, and CLI workflows outlined below.
+The following section is retained for historical reference for teams still running the earlier Starknet deployment. It covers Cairo smart contracts, the Starknet JavaScript SDK, and STARK-based validity proofs. The active BNB Chain deployment does not require these steps.
 
 ### 1. Client & SDK Setup
 

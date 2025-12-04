@@ -1,6 +1,6 @@
 ## Prompthash ASI FastAPI API
 
-This folder contains a standalone FastAPI backend that exposes a unified REST API for:
+This folder contains a standalone FastAPI backend that exposes a unified REST API for the PromptHash frontend (now targeting **BNB Chain** for on-chain flows) and the hosted ASI AI service at `https://prompthash-asi.onrender.com`:
 
 - **Chatting with ASI models** (via a chat agent)
 - **Improving prompts** for text or image generation

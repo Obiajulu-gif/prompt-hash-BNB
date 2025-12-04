@@ -17,11 +17,11 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-start gap-6 mb-8">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="/images/alex.STRK.png" />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src="/images/alex.sol.png" />
+              <AvatarFallback>BN</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold">John.STRK</h1>
+              <h1 className="text-3xl font-bold">John.BNB</h1>
               <p className="text-muted-foreground">Joined December 2023</p>
               <div className="flex items-center gap-2 mt-2">
                 <StarIcon className="h-4 w-4 fill-yellow-500 text-yellow-500" />
@@ -60,7 +60,7 @@ export default function ProfilePage() {
                             2 days ago
                           </p>
                         </div>
-                        <Badge>0.08 STRK</Badge>
+                        <Badge>0.08 BNB</Badge>
                       </div>
                       <div className="flex justify-between items-center py-2 border-b">
                         <div>
@@ -71,7 +71,7 @@ export default function ProfilePage() {
                             5 days ago
                           </p>
                         </div>
-                        <Badge>0.1 STRK</Badge>
+                        <Badge>0.1 BNB</Badge>
                       </div>
                     </div>
                   </CardContent>
@@ -97,7 +97,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Balance</p>
-                      <p className="text-2xl font-bold">2.5 STRK</p>
+                      <p className="text-2xl font-bold">2.5 BNB</p>
                     </div>
                     <Button className="w-full">Withdraw Funds</Button>
                   </div>
@@ -124,7 +124,7 @@ export default function ProfilePage() {
                         title="Display Name"
                         placeholder="Enter Display Name"
                         className="w-full mt-1 px-3 py-2 border rounded-md"
-                        defaultValue="John.STRK"
+                        defaultValue="John.BNB"
                       />
                     </div>
                     <div>
