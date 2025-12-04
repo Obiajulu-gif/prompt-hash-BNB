@@ -12,6 +12,8 @@ import {
   STARGATE_STRK_ADDRESS,
 } from "@/lib/constants";
 import { useMemo } from "react";
+import { shortenAddress, USDtoBNB } from "@/lib/utils";
+import { formatEther } from "ethers";
 
 export const PromptCard = ({
   prompt,
@@ -24,6 +26,11 @@ export const PromptCard = ({
   index: number;
   openModal: (prompt: Prompt) => void;
 }) => {
+  // const price = Number(prompt?.price) / 10^18;
+  // const USDValue = USDtoBNB(price, "USD");
+
+  const price = formatEther(prompt?.price!);
+  const USDValue = USDtoBNB(Number(price), "USD");
   return (
     <Card
       key={prompt?.id}
@@ -52,12 +59,12 @@ export const PromptCard = ({
             <span className="text-sm">{prompt?.likes}</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Seller: {prompt?.owner.slice(0, 6)}...
+            Seller: {shortenAddress(prompt?.owner!)}
           </p>
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between items-center">
-        <span className="text-lg font-bold">{prompt?.price} BNB</span>
+        <span className="text-lg font-bold">{USDValue.toFixed(2)} USD</span>
         <Button onClick={() => openModal(prompt)}>
           <ShoppingCart className="mr-2 h-4 w-4" />
           Buy Now

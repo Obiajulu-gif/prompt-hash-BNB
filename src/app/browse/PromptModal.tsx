@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Prompt } from "./FetchAllPrompts";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, StarIcon } from "lucide-react";
-import { shortenAddress } from "@/lib/utils";
+import { shortenAddress, USDtoBNB } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   ERC20ABI,
@@ -15,6 +15,7 @@ import { getContract, prepareContractCall, toWei } from "thirdweb";
 import { client } from "@/components/thirdwebClient";
 import { bscTestnet } from "thirdweb/chains";
 import { useActiveAccount, useSendTransaction } from "thirdweb/react";
+import { formatEther } from "ethers";
 
 export const PromptModal = ({
   selectedPrompt,
@@ -34,6 +35,9 @@ export const PromptModal = ({
 
   const activeAccount = useActiveAccount();
 
+  const price = formatEther(selectedPrompt?.price!);
+  const USDValue = USDtoBNB(Number(price), "USD");
+
   const {
     mutateAsync: buyPrompt,
     data: result,
@@ -48,7 +52,7 @@ export const PromptModal = ({
       contract,
       method: "buy",
       params: [BigInt(selectedPrompt.id)],
-      value: toWei(selectedPrompt.price), // 0.0002 BNB
+      value: toWei(price), // 0.0002 BNB
     });
 
     return call;
@@ -57,8 +61,12 @@ export const PromptModal = ({
   const handleBuyPrompt = async () => {
     if (!transaction) return;
 
-    const txHash = await buyPrompt(transaction);
-    console.log("Transaction successfully sent: ", txHash);
+    try {
+      const txHash = await buyPrompt(transaction);
+      console.log("Transaction successfully sent: ", txHash);
+    } catch (err) {
+      console.error(err);
+    }
 
     closeModal();
     toast.success("Prompt purchase successful");
@@ -131,7 +139,7 @@ export const PromptModal = ({
 
           <div className="flex justify-between items-center">
             <span className="text-2xl font-bold">
-              {selectedPrompt?.price} BNB
+              {USDValue.toFixed(2)} USD
             </span>
             <Button onClick={handleBuyPrompt}>
               <ShoppingCart className="mr-2 h-4 w-4" />

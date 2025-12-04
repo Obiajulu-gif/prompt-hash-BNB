@@ -48,7 +48,6 @@ const FetchAllPrompts = ({
   searchQuery = "",
 }) => {
   const [prompts, setPrompts] = useState([]);
-  // const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt>();
   const [isModalOpen, setIsModalOpen] = useState(false);
