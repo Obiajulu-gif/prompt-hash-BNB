@@ -11,7 +11,7 @@ const trendingPrompts = [
     id: 1,
     title: "Cyberpunk Character",
     image: "/images/cyberpunk.png",
-    price: "0.05 STRK",
+    price: "0.05 BNB",
     category: "Image",
     rating: 4.8,
     description:
@@ -21,7 +21,7 @@ const trendingPrompts = [
     id: 2,
     title: "Fantasy Landscape",
     image: "/images/fantasy.png",
-    price: "0.03 STRK",
+    price: "0.03 BNB",
     category: "Image",
     rating: 4.9,
     description:
@@ -31,7 +31,7 @@ const trendingPrompts = [
     id: 3,
     title: "Sci-Fi Story Generator",
     image: "/images/sci-fi.png",
-    price: "0.02 STRK",
+    price: "0.02 BNB",
     category: "Text",
     rating: 4.7,
     description:
@@ -41,7 +41,7 @@ const trendingPrompts = [
     id: 4,
     title: "Product Description",
     image: "/images/product-sales.png",
-    price: "0.01 STRK",
+    price: "0.01 BNB",
     category: "Marketing",
     rating: 4.6,
     description:
@@ -51,7 +51,7 @@ const trendingPrompts = [
     id: 5,
     title: "React Component Builder",
     image: "/images/react-component.png",
-    price: "0.08 STRK",
+    price: "0.08 BNB",
     category: "Code",
     rating: 4.9,
     description:

@@ -1,24 +1,39 @@
 // This is a proxy endpoint to help debug the improve-prompt API issues
 import { NextResponse } from "next/server";
 
-const API_BASE_URL = "https://secret-ai-gateway.onrender.com";
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "https://prompthash-asi.onrender.com"
+).replace(/\/$/, "");
+const API_PREFIX = `${API_BASE_URL}/api`;
 
 export async function POST(request: Request) {
   try {
-    // Get the request body as text instead of JSON
-    const promptText = await request.text();
+    const contentType = request.headers.get("content-type") || "";
+    const defaultPayload = { prompt: "", target: "text" as "text" | "image" };
+    let payload = defaultPayload;
+
+    if (contentType.includes("application/json")) {
+      const parsed = await request.json();
+      payload = {
+        prompt: parsed?.prompt || "",
+        target: parsed?.target || "text",
+      };
+    } else {
+      const promptText = await request.text();
+      payload = { prompt: promptText, target: "text" };
+    }
 
     // Log the request body for debugging
-    console.log("Improve prompt request:", promptText);
+    console.log("Improve prompt request:", payload);
 
     // Forward the request to the actual API
-    const response = await fetch(`${API_BASE_URL}/api/improve-prompt`, {
+    const response = await fetch(`${API_PREFIX}/improve`, {
       method: "POST",
       headers: {
-        "Content-Type": "text/plain",
+        "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: promptText,
+      body: JSON.stringify(payload),
     });
 
     // Get the response data
