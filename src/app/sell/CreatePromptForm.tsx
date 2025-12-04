@@ -16,6 +16,7 @@ import { getContract, prepareContractCall, toWei } from "thirdweb";
 import { useSendTransaction } from "thirdweb/react";
 import { client } from "@/components/thirdwebClient";
 import { bscTestnet } from "thirdweb/chains";
+import { USDtoBNB } from "@/lib/utils";
 
 interface FormData {
   imageUrl: string;
@@ -31,8 +32,41 @@ export function CreatePromptForm() {
     title: "",
     description: "",
     category: "",
-    price: "0.0002",
+    price: "1",
   });
+
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+
+  const getErrors = () => {
+    const newErrors: { [key: string]: string | null } = {};
+
+    if (touched.imageUrl && !formData.imageUrl.trim())
+      newErrors.imageUrl = "Image URL is required";
+
+    if (touched.title) {
+      if (!formData.title.trim()) newErrors.title = "Title is required";
+      else if (formData.title.length < 3)
+        newErrors.title = "Title must be at least 3 characters";
+    }
+
+    if (touched.description) {
+      if (!formData.description.trim())
+        newErrors.description = "Description is required";
+      else if (formData.description.length < 10)
+        newErrors.description = "Must be 10+ chars";
+    }
+
+    if (touched.category && !formData.category)
+      newErrors.category = "Category is required";
+
+    if (touched.price) {
+      if (!formData.price.trim()) newErrors.price = "Price is required";
+      else if (Number(formData.price) < 1)
+        newErrors.price = "Must be at least $1";
+    }
+
+    return newErrors;
+  };
 
   const [errors, setErrors] = useState<{ [key: string]: string | null }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,9 +78,10 @@ export function CreatePromptForm() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
+    // if (errors[name]) {
+    //   setErrors((prev) => ({ ...prev, [name]: null }));
+    // }
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
   const handleCategoryChange = (value: string) => {
@@ -69,8 +104,8 @@ export function CreatePromptForm() {
       newErrors.description = "Description must be at least 10 characters";
     if (!formData.category) newErrors.category = "Category is required";
     if (!formData.price) newErrors.price = "Price is required";
-    if (isNaN(Number(formData.price)) || Number(formData.price) < 0.0002) {
-      newErrors.price = "Price must be at least 0.0002 BNB";
+    if (isNaN(Number(formData.price)) || Number(formData.price) < 1) {
+      newErrors.price = "Price must be at least 1 USD";
     }
 
     setErrors(newErrors);
@@ -84,24 +119,10 @@ export function CreatePromptForm() {
     abi: PROMPT_HASH_EVM_ABI,
   });
 
-  const transaction = useMemo(() => {
-    if (!validateForm()) return;
+  // const transaction = useMemo(() => {
 
-    const call = prepareContractCall({
-      contract,
-      method: "create",
-      params: [
-        BigInt(Number(formData.price)),
-        formData.title,
-        formData.description,
-        formData.category,
-        formData.imageUrl,
-      ],
-      value: toWei("0.0002"), // 0.0002 BNB
-    });
-
-    return call;
-  }, [formData]);
+  //   return call;
+  // }, [formData]);
 
   const { push } = useRouter();
 
@@ -118,8 +139,6 @@ export function CreatePromptForm() {
 
     if (!validateForm()) return;
 
-    if (!transaction) return;
-
     setIsSubmitting(true);
 
     console.log(contract.address);
@@ -130,7 +149,25 @@ export function CreatePromptForm() {
       console.log("- Price:", formData.price, "BNB");
       console.log("- Category:", formData.category);
 
-      const { transactionHash: txHash } = await createPrompt(transaction);
+      const bnbValue = USDtoBNB(Number(formData.price), "BNB").toString();
+
+      const valueInWei = (Number(formData.price) * 10) ^ 18;
+      const weiInteger = Math.floor(valueInWei);
+
+      const call = prepareContractCall({
+        contract,
+        method: "create",
+        params: [
+          toWei(bnbValue),
+          formData.title,
+          formData.description,
+          formData.category,
+          formData.imageUrl,
+        ],
+        value: toWei(bnbValue), // 0.0002 BNB
+      });
+
+      const { transactionHash: txHash } = await createPrompt(call);
       console.log("Transaction sent: ", txHash);
       setSuccess("Prompt created successfully!");
 
@@ -241,7 +278,7 @@ export function CreatePromptForm() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Price (STRK)</label>
+          <label className="text-sm font-medium">Price (USD)</label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input

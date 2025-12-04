@@ -49,3 +49,14 @@ export const shortenAddress = (address: string) =>
 //         throw new Error('Invalid amount format');
 //     }
 // };
+const BNB = 0.0011;
+const USD = 909.8;
+
+export const USDtoBNB = (value: number, conv: "USD" | "BNB"): number => {
+  // conv defines what should be returned
+  if (conv === "BNB") {
+    return value * BNB;
+  } else {
+    return value * USD;
+  }
+};
